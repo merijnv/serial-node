@@ -161,4 +161,29 @@ SerialPort.prototype.read = function (looping) {
     }
 };
 
+
+// Support binary data
+SerialPort.prototype.readBytes = function(length) {
+  console.log("length to read: " + length);
+  var buff = new Buffer(15);
+  var read = fs.readSync(fd, buff, 0, length, null);
+  console.log('read: ' + read + ' bytes.');
+
+  return buff;
+};
+
+SerialPort.prototype.writeBytes = function(value)
+{
+  console.log("writeBytes value: " + JSON.stringify(value));
+  try
+  {
+    fs.writeSync(fd, value, 0, value.length, null);
+  }
+  catch (err)
+  {
+    this.write(value);
+  }
+};
+
+
 module.exports = SerialPort;
