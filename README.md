@@ -15,10 +15,10 @@ Example:
 ```javascript
 var SerialPort = require('serial-node');
 var serial = new SerialPort();
-var match = serial.list();
+var list = serial.list();
 for(i=0;i<list.length;i++) 
 {
-    console.log(match[i]); 
+    console.log(list[i]); 
 }
 ```
 Note: if there is no available port, the returned array is equal 0.
