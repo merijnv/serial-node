@@ -23,15 +23,15 @@ function error_use(config_var, local_var, text) {
     }
 }
 
-function open() {
-    try {
-        port = "\\\\.\\" + config.port;
-        fd = fs.openSync(port, 'w+');
-    }
-    catch (err) {
-        console.log(err.message);
-    }
-};
+function notopen()
+{
+  if(!fd)
+  {
+    console.log("Port is not open.");
+    process.exit();
+  }
+}
+
 function close() {
     try {
         fs.closeSync(fd);
@@ -45,8 +45,21 @@ function close() {
 
 var SerialPort = function () { };
 
+
+
+SerialPort.prototype.open = function() {
+    try {
+        port = "\\\\.\\" + config.port;
+        fd = fs.openSync(port, 'w+');
+    }
+    catch (err) {
+        console.log(err.message);
+    }
+};
+
 SerialPort.prototype.use = function (port, options) {
     options = options || {};
+    // TODO: also allow patterns for /dev filesystem.
     config.port = (!port) ? 0 : ((port.match(/^COM(\d+)$/gi)) ? port : 0);
     config.baud = (!options.baud) ? 9600 : (options.baud.match(/([\d])+/g)) ? options.baud : 0;
     config.databits = (!options.databits) ? 8 : (contains(constant.dbits, options.databits)) ? options.databits : 0;
@@ -112,12 +125,10 @@ SerialPort.prototype.list = function () {
 SerialPort.prototype.write = function (value) {
     try {
 
-        open();
+        notopen();
 
         fs.writeSync(fd, value, null, "ascii");
         config.callbackWrite({ state: true });
-
-        close();
 
     }
     catch (err) {
@@ -131,7 +142,7 @@ SerialPort.prototype.read = function (looping) {
     try {
 
         var $this = this;
-        open();
+        notopen();
 
         var print = '', string;
         while (!contains(constant.read_end, string)) {
@@ -141,7 +152,6 @@ SerialPort.prototype.read = function (looping) {
             if (read === 1) print += string; else buff = null;
         }
 
-        close();
         config.callbackRead({ state: true, value: print });
 
         if (stop) {
@@ -164,19 +174,18 @@ SerialPort.prototype.read = function (looping) {
 
 // Support binary data
 SerialPort.prototype.readBytes = function(length) {
-  console.log("length to read: " + length);
+  notopen();
   var buff = new Buffer(15);
   var read = fs.readSync(fd, buff, 0, length, null);
-  console.log('read: ' + read + ' bytes.');
 
   return buff;
 };
 
 SerialPort.prototype.writeBytes = function(value)
 {
-  console.log("writeBytes value: " + JSON.stringify(value));
   try
   {
+    notopen();
     fs.writeSync(fd, value, 0, value.length, null);
   }
   catch (err)
