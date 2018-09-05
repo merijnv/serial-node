@@ -48,13 +48,8 @@ var SerialPort = function () { };
 
 
 SerialPort.prototype.open = function() {
-    try {
-        port = "\\\\.\\" + config.port;
-        fd = fs.openSync(port, 'w+');
-    }
-    catch (err) {
-        console.log(err.message);
-    }
+    port = "\\\\.\\" + config.port;
+    fd = fs.openSync(port, 'w+');
 };
 
 SerialPort.prototype.use = function (port, options) {
@@ -175,7 +170,7 @@ SerialPort.prototype.read = function (looping) {
 // Support binary data
 SerialPort.prototype.readBytes = function(length) {
   notopen();
-  var buff = new Buffer(15);
+  var buff = new Buffer(length);
   var read = fs.readSync(fd, buff, 0, length, null);
 
   return buff;
